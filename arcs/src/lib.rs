@@ -20,6 +20,11 @@
 #![forbid(unsafe_code)]
 #![deny(missing_debug_implementations, intra_doc_link_resolution_failure)]
 
+pub use euclid;
+pub use piet;
+pub use piet_web;
+pub use specs;
+
 pub mod components;
 pub mod systems;
 mod types;
