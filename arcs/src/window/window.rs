@@ -1,10 +1,10 @@
 use crate::{
     algorithms::Bounded,
     components::{
-        DrawingObject, Geometry, Layer, LineStyle, PointStyle, Viewport,
-        WindowStyle,
+        DrawingObject, Geometry, GridStyle, Layer, LineStyle, PointStyle,
+        Viewport, WindowStyle,
     },
-    BoundingBox, CanvasSpace, DrawingSpace, Line, Point,
+    BoundingBox, CanvasSpace, DrawingSpace, Grid, Line, Point,
 };
 use euclid::{Point2D, Scale, Size2D};
 use kurbo::Circle;
@@ -26,6 +26,7 @@ impl Window {
                 centre: Point::zero(),
                 pixels_per_drawing_unit: Scale::new(1.0),
             })
+            .with(GridStyle::default())
             .with(LineStyle::default())
             .with(PointStyle::default())
             .with(WindowStyle::default())
@@ -89,6 +90,7 @@ impl Window {
         viewport, viewport_mut, stringify!(Viewport) => Viewport,
         default_point_style, default_point_style_mut, stringify!(PointStyle) => PointStyle,
         default_line_style, default_line_style_mut, stringify!(LineStyle) => LineStyle,
+        default_grid_style, default_grid_style_mut, stringify!(GridStyle) => GridStyle,
         style, style_mut, stringify!(WindowStyle) => WindowStyle,
     }
 }
@@ -106,7 +108,10 @@ struct RenderSystem<'window, B> {
 
 impl<'window, B> RenderSystem<'window, B> {
     /// Calculate the area of the drawing displayed by the viewport.
-    fn viewport_dimensions(&self, viewport: &Viewport) -> BoundingBox<DrawingSpace> {
+    fn viewport_dimensions(
+        &self,
+        viewport: &Viewport,
+    ) -> BoundingBox<DrawingSpace> {
         let window_size = viewport
             .pixels_per_drawing_unit
             .inv()
@@ -133,7 +138,7 @@ impl<'window, B: RenderContext> RenderSystem<'window, B> {
                     styles,
                     viewport,
                 );
-            },
+            }
             Geometry::Line(ref line) => {
                 self.render_line(
                     ent,
@@ -142,7 +147,16 @@ impl<'window, B: RenderContext> RenderSystem<'window, B> {
                     styles,
                     viewport,
                 );
-            },
+            }
+            Geometry::Grid(ref grid) => {
+                self.render_grid(
+                    ent,
+                    grid,
+                    drawing_object.layer,
+                    styles,
+                    viewport,
+                );
+            }
             _ => unimplemented!(),
         }
     }
@@ -188,6 +202,51 @@ impl<'window, B: RenderContext> RenderSystem<'window, B> {
         self.backend.stroke(shape, &style.stroke, stroke_width);
     }
 
+    fn render_grid(
+        &mut self,
+        entity: Entity,
+        grid: &Grid,
+        layer: Entity,
+        styles: &Styling,
+        viewport: &Viewport,
+    ) {
+        let style = resolve_grid_style(styles, self.window, entity, layer);
+        let stroke_width =
+            style.width.in_pixels(viewport.pixels_per_drawing_unit);
+
+        let viewport_dimensions = self.viewport_dimensions(&viewport);
+
+        let start_x = viewport_dimensions.bottom_left().x;
+        let end_x = viewport_dimensions.top_right().x;
+        let start_y = viewport_dimensions.bottom_left().y;
+        let end_y = viewport_dimensions.top_right().y;
+        let mut x = start_x;
+        while x < end_x {
+            let start = Point2D::new(x, start_y);
+            let start = self.to_canvas_coordinates(start, viewport);
+            let end = Point2D::new(x, end_y);
+            let end = self.to_canvas_coordinates(end, viewport);
+
+            let shape = kurbo::Line::new(start.to_tuple(), end.to_tuple());
+            self.backend.stroke(shape, &style.stroke, stroke_width);
+
+            x += grid.grid_spacing.0;
+        }
+
+        let mut y = start_y;
+        while y < end_y {
+            let start = Point2D::new(start_x, y);
+            let start = self.to_canvas_coordinates(start, viewport);
+            let end = Point2D::new(end_x, y);
+            let end = self.to_canvas_coordinates(end, viewport);
+
+            let shape = kurbo::Line::new(start.to_tuple(), end.to_tuple());
+            self.backend.stroke(shape, &style.stroke, stroke_width);
+
+            y += grid.grid_spacing.0;
+        }
+    }
+
     /// Translates a [`crate::Point`] from drawing space to a location in
     /// [`CanvasSpace`].
     fn to_canvas_coordinates(
@@ -230,6 +289,7 @@ impl<'window, 'world, B: RenderContext> System<'world>
 struct Styling<'world> {
     point_styles: ReadStorage<'world, PointStyle>,
     line_styles: ReadStorage<'world, LineStyle>,
+    grid_styles: ReadStorage<'world, GridStyle>,
     window_styles: ReadStorage<'world, WindowStyle>,
 }
 
@@ -260,6 +320,19 @@ fn resolve_line_style<'a>(
         .get(line)
         .or_else(|| styling.line_styles.get(layer))
         .unwrap_or_else(|| window.default_line_style(&styling.line_styles))
+}
+
+fn resolve_grid_style<'a>(
+    styling: &'a Styling,
+    window: &'a Window,
+    grid: Entity,
+    layer: Entity,
+) -> &'a GridStyle {
+    styling
+        .grid_styles
+        .get(grid)
+        .or_else(|| styling.grid_styles.get(layer))
+        .unwrap_or_else(|| window.default_grid_style(&styling.grid_styles))
 }
 
 /// The state needed when calculating which order to draw things in so z-levels

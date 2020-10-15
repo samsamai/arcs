@@ -1,5 +1,5 @@
 use crate::{
-    primitives::{Arc, Line},
+    primitives::{Arc, Grid, Line},
     BoundingBox,
 };
 use euclid::{Angle, Point2D};
@@ -11,20 +11,32 @@ pub trait Bounded<S> {
 }
 
 impl<'a, S, B: Bounded<S> + ?Sized> Bounded<S> for &'a B {
-    fn bounding_box(&self) -> BoundingBox<S> { (*self).bounding_box() }
+    fn bounding_box(&self) -> BoundingBox<S> {
+        (*self).bounding_box()
+    }
 }
 
 impl<S> Bounded<S> for BoundingBox<S> {
-    fn bounding_box(&self) -> BoundingBox<S> { *self }
+    fn bounding_box(&self) -> BoundingBox<S> {
+        *self
+    }
 }
 
 impl<S> Bounded<S> for Point2D<f64, S> {
-    fn bounding_box(&self) -> BoundingBox<S> { BoundingBox::new(*self, *self) }
+    fn bounding_box(&self) -> BoundingBox<S> {
+        BoundingBox::new(*self, *self)
+    }
 }
 
 impl<S> Bounded<S> for Line<S> {
     fn bounding_box(&self) -> BoundingBox<S> {
         BoundingBox::new(self.start, self.end)
+    }
+}
+
+impl<S> Bounded<S> for Grid<S> {
+    fn bounding_box(&self) -> BoundingBox<S> {
+        BoundingBox::new(Point2D::zero(), Point2D::zero())
     }
 }
 

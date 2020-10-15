@@ -18,12 +18,12 @@ pub use drawing_object::{DrawingObject, Geometry};
 pub use layer::Layer;
 pub use name::{Name, NameTable};
 pub use selected::Selected;
-pub use styles::{LineStyle, PointStyle, WindowStyle};
+pub use styles::{GridStyle, LineStyle, PointStyle, WindowStyle};
 pub use viewport::Viewport;
 pub(crate) use vtable::ComponentVtable;
 
-use specs::World;
 use crate::DrawingSpace;
+use specs::World;
 
 /// Get an iterator over the [`ComponentVtable`] for all known
 /// [`specs::Component`] types.
@@ -35,6 +35,7 @@ pub(crate) fn known_components(
             ComponentVtable::for_type::<DrawingObject>(),
             ComponentVtable::for_type::<Layer>(),
             ComponentVtable::for_type::<Name>(),
+            ComponentVtable::for_type::<GridStyle>(),
             ComponentVtable::for_type::<LineStyle>(),
             ComponentVtable::for_type::<PointStyle>(),
             ComponentVtable::for_type::<Selected>(),

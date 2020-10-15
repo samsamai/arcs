@@ -36,6 +36,22 @@ impl Default for LineStyle {
 }
 
 #[derive(Debug, Clone, Component)]
+#[storage(DenseVecStorage)]
+pub struct GridStyle {
+    pub stroke: Color,
+    pub width: Dimension,
+}
+
+impl Default for GridStyle {
+    fn default() -> GridStyle {
+        GridStyle {
+            stroke: Color::rgb8(0x94, 0x94, 0x94),
+            width: Dimension::Pixels(0.1),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Component)]
 #[storage(HashMapStorage)]
 pub struct WindowStyle {
     pub background_colour: Color,

@@ -38,3 +38,5 @@ pub use types::{CanvasSpace, DrawingSpace, Length, Point, Transform, Vector};
 pub type Arc = primitives::Arc<DrawingSpace>;
 /// A [`primitives::Line`] in [`DrawingSpace`].
 pub type Line = primitives::Line<DrawingSpace>;
+/// A [`primitives::Grid`] in [`DrawingSpace`].
+pub type Grid = primitives::Grid<DrawingSpace>;

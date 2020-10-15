@@ -1,6 +1,6 @@
 use crate::{
     algorithms::Length,
-    primitives::{Arc, Line},
+    primitives::{Arc, Grid, Line},
 };
 use euclid::{approxeq::ApproxEq, Point2D, Scale, Vector2D};
 use std::iter::FromIterator;
@@ -135,6 +135,12 @@ impl<Space> ClosestPoint<Space> for Arc<Space> {
         } else {
             Closest::One(self.end())
         }
+    }
+}
+
+impl<Space> ClosestPoint<Space> for Grid<Space> {
+    fn closest_point(&self, target: Point2D<f64, Space>) -> Closest<Space> {
+        Closest::One(target)
     }
 }
 
