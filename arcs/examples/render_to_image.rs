@@ -1,7 +1,7 @@
 use arcs::{
     components::{
-        Dimension, DrawingObject, Geometry, Layer, LineStyle, Name, PointStyle,
-        Viewport,
+        layer::LayerType, Dimension, DrawingObject, Geometry, Layer, LineStyle,
+        Name, PointStyle, Viewport,
     },
     window::Window,
     Length, Line, Point,
@@ -27,6 +27,7 @@ fn main() {
         Layer {
             z_level: 0,
             visible: true,
+            layer_type: LayerType::Geometry,
         },
     );
 

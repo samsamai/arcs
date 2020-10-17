@@ -1,8 +1,8 @@
 use crate::{
     algorithms::Bounded,
     components::{
-        DrawingObject, Geometry, GridStyle, Layer, LineStyle, PointStyle,
-        Viewport, WindowStyle,
+        layer::LayerType, DrawingObject, Geometry, GridStyle, Layer, LineStyle,
+        PointStyle, Viewport, WindowStyle,
     },
     BoundingBox, CanvasSpace, DrawingSpace, Grid, Line, Point,
 };
@@ -126,6 +126,27 @@ impl<'window, B: RenderContext> RenderSystem<'window, B> {
         &mut self,
         ent: Entity,
         drawing_object: &DrawingObject,
+        layer: &Layer,
+        styles: &Styling,
+        viewport: &Viewport,
+    ) {
+        match layer.layer_type {
+            LayerType::System => {
+                self.render_system_layer(ent, drawing_object, styles, viewport)
+            }
+            LayerType::Geometry => self.render_geometry_layers(
+                ent,
+                drawing_object,
+                styles,
+                viewport,
+            ),
+        }
+    }
+
+    fn render_geometry_layers(
+        &mut self,
+        ent: Entity,
+        drawing_object: &DrawingObject,
         styles: &Styling,
         viewport: &Viewport,
     ) {
@@ -148,6 +169,18 @@ impl<'window, B: RenderContext> RenderSystem<'window, B> {
                     viewport,
                 );
             }
+            _ => unimplemented!(),
+        }
+    }
+
+    fn render_system_layer(
+        &mut self,
+        ent: Entity,
+        drawing_object: &DrawingObject,
+        styles: &Styling,
+        viewport: &Viewport,
+    ) {
+        match drawing_object.geometry {
             Geometry::Grid(ref grid) => {
                 self.render_grid(
                     ent,
@@ -216,32 +249,45 @@ impl<'window, B: RenderContext> RenderSystem<'window, B> {
 
         let viewport_dimensions = self.viewport_dimensions(&viewport);
 
-        let start_x = viewport_dimensions.bottom_left().x;
-        let end_x = viewport_dimensions.top_right().x;
-        let start_y = viewport_dimensions.bottom_left().y;
-        let end_y = viewport_dimensions.top_right().y;
+        let min_x = viewport_dimensions.bottom_left().x;
+        let start_x = min_x - min_x % grid.grid_spacing.0;
+        let max_x = viewport_dimensions.top_right().x;
+        let end_x = max_x - max_x % grid.grid_spacing.0;
+        let min_y = viewport_dimensions.bottom_left().y;
+        let start_y = min_y - min_y % grid.grid_spacing.0;
+        let max_y = viewport_dimensions.top_right().y;
+        let end_y = max_y - max_y % grid.grid_spacing.0;
+
         let mut x = start_x;
-        while x < end_x {
-            let start = Point2D::new(x, start_y);
+        while x <= end_x {
+            let start = Point2D::new(x, min_y);
             let start = self.to_canvas_coordinates(start, viewport);
-            let end = Point2D::new(x, end_y);
+            let end = Point2D::new(x, max_y);
             let end = self.to_canvas_coordinates(end, viewport);
 
             let shape = kurbo::Line::new(start.to_tuple(), end.to_tuple());
-            self.backend.stroke(shape, &style.stroke, stroke_width);
+            if x == 0. {
+                self.backend.stroke(shape, &style.stroke, 1.);
+            } else {
+                self.backend.stroke(shape, &style.stroke, stroke_width);
+            }
 
             x += grid.grid_spacing.0;
         }
 
         let mut y = start_y;
-        while y < end_y {
-            let start = Point2D::new(start_x, y);
+        while y <= end_y {
+            let start = Point2D::new(min_x, y);
             let start = self.to_canvas_coordinates(start, viewport);
-            let end = Point2D::new(end_x, y);
+            let end = Point2D::new(max_x, y);
             let end = self.to_canvas_coordinates(end, viewport);
 
             let shape = kurbo::Line::new(start.to_tuple(), end.to_tuple());
-            self.backend.stroke(shape, &style.stroke, stroke_width);
+            if y == 0. {
+                self.backend.stroke(shape, &style.stroke, 1.);
+            } else {
+                self.backend.stroke(shape, &style.stroke, stroke_width);
+            }
 
             y += grid.grid_spacing.0;
         }
@@ -278,8 +324,8 @@ impl<'window, 'world, B: RenderContext> System<'world>
 
         let viewport_dimensions = self.viewport_dimensions(&viewport);
 
-        for (ent, obj) in draw_order.calculate(viewport_dimensions) {
-            self.render(ent, obj, &styling, viewport);
+        for (ent, obj, layer) in draw_order.calculate(viewport_dimensions) {
+            self.render(ent, obj, layer, &styling, viewport);
         }
     }
 }
@@ -349,9 +395,11 @@ impl<'world> DrawOrder<'world> {
     fn calculate(
         &self,
         viewport_dimensions: BoundingBox<DrawingSpace>,
-    ) -> impl Iterator<Item = (Entity, &'_ DrawingObject)> + '_ {
-        type EntitiesByZLevel<'a> =
-            BTreeMap<Reverse<usize>, Vec<(Entity, &'a DrawingObject)>>;
+    ) -> impl Iterator<Item = (Entity, &'_ DrawingObject, &'_ Layer)> + '_ {
+        type EntitiesByZLevel<'a> = BTreeMap<
+            Reverse<usize>,
+            Vec<(Entity, &'a DrawingObject, &'a Layer)>,
+        >;
 
         // Iterate through all drawing objects, grouping them by the parent
         // layer's z-level in reverse order (we want to yield higher z-levels
@@ -372,7 +420,7 @@ impl<'world> DrawOrder<'world> {
         )
             .join()
         {
-            let Layer { z_level, visible } = self
+            let layer = self
                 .layers
                 .get(obj.layer)
                 .expect("The object's layer was deleted");
@@ -382,11 +430,13 @@ impl<'world> DrawOrder<'world> {
                 .copied()
                 .unwrap_or_else(|| obj.geometry.bounding_box());
 
-            if *visible && viewport_dimensions.intersects_with(bounds) {
+            if layer.visible && viewport_dimensions.intersects_with(bounds)
+                || layer.layer_type == LayerType::System
+            {
                 drawing_objects
-                    .entry(Reverse(*z_level))
+                    .entry(Reverse(layer.z_level))
                     .or_default()
-                    .push((ent, obj));
+                    .push((ent, obj, layer));
             }
         }
 

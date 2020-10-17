@@ -2,7 +2,7 @@
 
 mod dimension;
 mod drawing_object;
-mod layer;
+pub mod layer;
 mod name;
 mod selected;
 mod styles;
