@@ -1,11 +1,10 @@
-use crate::{
-    algorithms::Bounded,
-    components::{AddPoint, DrawingObject, Geometry, Layer, Selected},
-};
+use crate::components::{AddPoint, DrawingObject, Geometry, Layer, Selected};
 use specs::prelude::*;
 
-/// Lets us keep track of a [`DrawingObject`]'s rough location in *Drawing
-/// Space*.
+/// A system which looks for [`Add...`] type commands and
+/// begins the process of adding the primitive to the world
+/// For example AddPoint command adds a point at the given
+/// location, in the given layer
 #[derive(Debug)]
 pub struct Draw;
 
@@ -26,7 +25,7 @@ impl<'world> System<'world> for Draw {
 
     fn run(&mut self, (entities, mut add_points, updater): Self::SystemData) {
         use specs::Join;
-        for (add_point) in (&mut add_points).join() {
+        for (entity, add_point) in (&entities, &mut add_points).join() {
             let temp_point = entities.create();
 
             updater.insert(temp_point, Selected);
@@ -37,33 +36,7 @@ impl<'world> System<'world> for Draw {
                     layer: add_point.layer,
                 },
             );
+            updater.remove::<AddPoint>(entity);
         }
     }
-
-    //     let (mut bounds, drawing_objects, entities) = data;
-
-    //     // find out which items have changed since we were last polled
-    //     for event in drawing_objects.channel().read(&mut self.changes) {
-    //         match *event {
-    //             ComponentEvent::Inserted(id) | ComponentEvent::Modified(id) => {
-    //                 self.to_update.add(id);
-    //             }
-    //             ComponentEvent::Removed(id) => {
-    //                 self.removed.add(id);
-    //             }
-    //         }
-    //     }
-
-    //     for (ent, drawing_object, _) in
-    //         (&entities, &drawing_objects, &self.to_update).join()
-    //     {
-    //         bounds
-    //             .insert(ent, drawing_object.geometry.bounding_box())
-    //             .unwrap();
-    //     }
-
-    //     for (ent, _) in (&entities, &self.removed).join() {
-    //         bounds.remove(ent);
-    //     }
-    // }
 }
