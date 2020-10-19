@@ -3,10 +3,12 @@
 mod bounds;
 mod name_table_bookkeeping;
 // mod spatial_relation;
+pub mod draw;
 
 pub use bounds::SyncBounds;
 pub use name_table_bookkeeping::NameTableBookkeeping;
 // pub use spatial_relation::SpatialRelation;
+pub use draw::Draw;
 
 use specs::{DispatcherBuilder, World};
 

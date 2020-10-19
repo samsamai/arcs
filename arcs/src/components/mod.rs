@@ -1,5 +1,7 @@
 //! Common components used by the `arcs` CAD library.
 
+mod add_point;
+mod cursor_position;
 mod dimension;
 mod drawing_object;
 pub mod layer;
@@ -13,6 +15,8 @@ mod vtable;
 // mod spatial_entity;
 // pub use spatial_entity::{Space, SpatialEntity};
 
+pub use add_point::AddPoint;
+pub use cursor_position::CursorPosition;
 pub use dimension::Dimension;
 pub use drawing_object::{DrawingObject, Geometry};
 pub use layer::Layer;
@@ -41,6 +45,8 @@ pub(crate) fn known_components(
             ComponentVtable::for_type::<Selected>(),
             ComponentVtable::for_type::<WindowStyle>(),
             ComponentVtable::for_type::<Viewport>(),
+            ComponentVtable::for_type::<CursorPosition>(),
+            ComponentVtable::for_type::<AddPoint>(),
         ];
     }
 
