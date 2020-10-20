@@ -3,6 +3,7 @@
 mod bounds;
 mod name_table_bookkeeping;
 // mod spatial_relation;
+pub mod deleter;
 pub mod draw;
 pub mod mover;
 pub mod snapper;
@@ -10,6 +11,7 @@ pub mod snapper;
 pub use bounds::SyncBounds;
 pub use name_table_bookkeeping::NameTableBookkeeping;
 // pub use spatial_relation::SpatialRelation;
+pub use deleter::Deleter;
 pub use draw::Draw;
 pub use mover::Mover;
 pub use snapper::Snapper;

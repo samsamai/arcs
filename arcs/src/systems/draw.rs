@@ -1,4 +1,6 @@
-use crate::components::{AddPoint, DrawingObject, Geometry, Layer, Selected};
+use crate::components::{
+    AddPoint, Delete, DrawingObject, Geometry, Layer, Selected,
+};
 use specs::prelude::*;
 
 /// A system which looks for [`Add...`] type commands and
@@ -24,7 +26,6 @@ impl<'world> System<'world> for Draw {
     );
 
     fn run(&mut self, (entities, mut add_points, updater): Self::SystemData) {
-        use specs::Join;
         for (entity, add_point) in (&entities, &mut add_points).join() {
             let temp_point = entities.create();
 

@@ -2,6 +2,7 @@
 
 mod add_point;
 mod cursor_position;
+mod delete;
 mod dimension;
 mod drawing_object;
 pub mod layer;
@@ -17,6 +18,7 @@ mod vtable;
 
 pub use add_point::AddPoint;
 pub use cursor_position::CursorPosition;
+pub use delete::Delete;
 pub use dimension::Dimension;
 pub use drawing_object::{DrawingObject, Geometry};
 pub use layer::Layer;
@@ -35,7 +37,9 @@ pub(crate) fn known_components(
 ) -> impl Iterator<Item = &'static ComponentVtable> + 'static {
     lazy_static::lazy_static! {
         static ref VTABLES: Vec<ComponentVtable> = vec![
+            ComponentVtable::for_type::<AddPoint>(),
             ComponentVtable::for_type::<arcs_core::BoundingBox<DrawingSpace>>(),
+            ComponentVtable::for_type::<Delete>(),
             ComponentVtable::for_type::<DrawingObject>(),
             ComponentVtable::for_type::<Layer>(),
             ComponentVtable::for_type::<Name>(),
@@ -46,7 +50,6 @@ pub(crate) fn known_components(
             ComponentVtable::for_type::<WindowStyle>(),
             ComponentVtable::for_type::<Viewport>(),
             ComponentVtable::for_type::<CursorPosition>(),
-            ComponentVtable::for_type::<AddPoint>(),
         ];
     }
 
