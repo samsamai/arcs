@@ -24,7 +24,6 @@ impl<'world> System<'world> for Snapper {
         &mut self,
         (drawing_objects, mut cursor_position): Self::SystemData,
     ) {
-        use specs::Join;
         for drawing_object in (drawing_objects).join() {
             if let Geometry::Grid(grid) = drawing_object.geometry {
                 let effective_cursor_location = Point2D::new(

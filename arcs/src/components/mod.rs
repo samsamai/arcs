@@ -1,5 +1,6 @@
 //! Common components used by the `arcs` CAD library.
 
+mod add_line;
 mod add_point;
 mod cursor_position;
 mod delete;
@@ -16,6 +17,7 @@ mod vtable;
 // mod spatial_entity;
 // pub use spatial_entity::{Space, SpatialEntity};
 
+pub use add_line::AddLine;
 pub use add_point::AddPoint;
 pub use cursor_position::CursorPosition;
 pub use delete::Delete;
@@ -37,6 +39,7 @@ pub(crate) fn known_components(
 ) -> impl Iterator<Item = &'static ComponentVtable> + 'static {
     lazy_static::lazy_static! {
         static ref VTABLES: Vec<ComponentVtable> = vec![
+            ComponentVtable::for_type::<AddLine>(),
             ComponentVtable::for_type::<AddPoint>(),
             ComponentVtable::for_type::<arcs_core::BoundingBox<DrawingSpace>>(),
             ComponentVtable::for_type::<Delete>(),

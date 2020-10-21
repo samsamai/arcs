@@ -1,6 +1,7 @@
 use crate::components::{
-    AddPoint, Delete, DrawingObject, Geometry, Layer, Selected,
+    AddLine, AddPoint, Delete, DrawingObject, Geometry, Layer, Selected,
 };
+use crate::primitives::Line;
 use specs::prelude::*;
 
 /// A system which looks for [`Add...`] type commands and
@@ -22,22 +23,42 @@ impl<'world> System<'world> for Draw {
     type SystemData = (
         Entities<'world>,
         WriteStorage<'world, AddPoint>,
+        WriteStorage<'world, AddLine>,
         Read<'world, LazyUpdate>,
     );
 
-    fn run(&mut self, (entities, mut add_points, updater): Self::SystemData) {
+    fn run(
+        &mut self,
+        (entities, mut add_points, mut add_lines, updater): Self::SystemData,
+    ) {
         for (entity, add_point) in (&entities, &mut add_points).join() {
-            let temp_point = entities.create();
+            let new_point = entities.create();
 
-            updater.insert(temp_point, Selected);
+            updater.insert(new_point, Selected);
             updater.insert(
-                temp_point,
+                new_point,
                 DrawingObject {
                     geometry: Geometry::Point(add_point.location),
                     layer: add_point.layer,
                 },
             );
             updater.remove::<AddPoint>(entity);
+        }
+        for (entity, add_line) in (&entities, &mut add_lines).join() {
+            let new_line = entities.create();
+
+            updater.insert(new_line, Selected);
+            updater.insert(
+                new_line,
+                DrawingObject {
+                    geometry: Geometry::Line(Line::new(
+                        add_line.location,
+                        add_line.location,
+                    )),
+                    layer: add_line.layer,
+                },
+            );
+            updater.remove::<AddLine>(entity);
         }
     }
 }

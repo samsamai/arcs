@@ -1,7 +1,7 @@
-use crate::components::{
-    AddPoint, CursorPosition, DrawingObject, Geometry, Layer, Selected,
+use crate::{
+    components::{CursorPosition, DrawingObject, Geometry, Selected},
+    primitives::Line,
 };
-use euclid::{Point2D, Scale, Size2D};
 use specs::prelude::*;
 
 /// A system which looks for selected entities and moves them
@@ -30,7 +30,6 @@ impl<'world> System<'world> for Mover {
         &mut self,
         (entities, selecteds, mut drawing_objects, cursor_position, updater): Self::SystemData,
     ) {
-        use specs::Join;
         for (entity, selected, drawing_object) in
             (&entities, &selecteds, &mut drawing_objects).join()
         {
@@ -38,6 +37,20 @@ impl<'world> System<'world> for Mover {
                 drawing_object.geometry =
                     Geometry::Point(cursor_position.location);
             };
+
+            match drawing_object.geometry {
+                Geometry::Point(point) => {
+                    drawing_object.geometry =
+                        Geometry::Point(cursor_position.location);
+                }
+                Geometry::Line(line) => {
+                    drawing_object.geometry = Geometry::Line(Line::new(
+                        line.start,
+                        cursor_position.location,
+                    ));
+                }
+                _ => (),
+            }
         }
     }
 }
