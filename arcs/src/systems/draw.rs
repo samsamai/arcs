@@ -1,5 +1,6 @@
 use crate::components::{
-    AddLine, AddPoint, Delete, DrawingObject, Geometry, Layer, Selected,
+    AddLine, AddPoint, CursorPosition, Delete, DrawingObject, Geometry, Layer,
+    Selected,
 };
 use crate::primitives::Line;
 use specs::prelude::*;
@@ -25,11 +26,12 @@ impl<'world> System<'world> for Draw {
         WriteStorage<'world, AddPoint>,
         WriteStorage<'world, AddLine>,
         Read<'world, LazyUpdate>,
+        Read<'world, CursorPosition>,
     );
 
     fn run(
         &mut self,
-        (entities, mut add_points, mut add_lines, updater): Self::SystemData,
+        (entities, mut add_points, mut add_lines, updater, cursor_position): Self::SystemData,
     ) {
         for (entity, add_point) in (&entities, &mut add_points).join() {
             let new_point = entities.create();
@@ -38,7 +40,7 @@ impl<'world> System<'world> for Draw {
             updater.insert(
                 new_point,
                 DrawingObject {
-                    geometry: Geometry::Point(add_point.location),
+                    geometry: Geometry::Point(cursor_position.location),
                     layer: add_point.layer,
                 },
             );
@@ -52,8 +54,8 @@ impl<'world> System<'world> for Draw {
                 new_line,
                 DrawingObject {
                     geometry: Geometry::Line(Line::new(
-                        add_line.location,
-                        add_line.location,
+                        cursor_position.location,
+                        cursor_position.location,
                     )),
                     layer: add_line.layer,
                 },

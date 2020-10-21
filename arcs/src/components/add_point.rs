@@ -1,4 +1,3 @@
-use crate::{euclid::Point2D, DrawingSpace};
 use specs::prelude::*;
 use specs_derive::Component;
 
@@ -6,6 +5,5 @@ use specs_derive::Component;
 /// the system.
 #[derive(Debug, Copy, Clone, PartialEq, Component)]
 pub struct AddPoint {
-    pub location: Point2D<f64, DrawingSpace>,
     pub layer: Entity,
 }
