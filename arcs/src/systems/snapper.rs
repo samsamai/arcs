@@ -26,14 +26,16 @@ impl<'world> System<'world> for Snapper {
     ) {
         for drawing_object in (drawing_objects).join() {
             if let Geometry::Grid(grid) = drawing_object.geometry {
-                let effective_cursor_location = Point2D::new(
-                    cursor_position.location.x
-                        - cursor_position.location.x % grid.grid_spacing.0,
-                    cursor_position.location.y
-                        - cursor_position.location.y % grid.grid_spacing.0,
-                );
+                if grid.snap {
+                    let effective_cursor_location = Point2D::new(
+                        cursor_position.location.x
+                            - cursor_position.location.x % grid.grid_spacing.0,
+                        cursor_position.location.y
+                            - cursor_position.location.y % grid.grid_spacing.0,
+                    );
 
-                cursor_position.location = effective_cursor_location;
+                    cursor_position.location = effective_cursor_location;
+                }
             }
         }
     }
