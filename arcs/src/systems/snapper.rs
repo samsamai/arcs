@@ -9,7 +9,7 @@ pub struct Snapper;
 impl Snapper {
     pub const NAME: &'static str = module_path!();
 
-    pub fn new(world: &World) -> Snapper {
+    pub fn new(_world: &World) -> Snapper {
         Snapper {}
     }
 }

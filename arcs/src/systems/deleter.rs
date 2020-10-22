@@ -9,7 +9,7 @@ pub struct Deleter;
 impl Deleter {
     pub const NAME: &'static str = module_path!();
 
-    pub fn new(world: &World) -> Deleter {
+    pub fn new(_world: &World) -> Deleter {
         Deleter {}
     }
 }
@@ -25,13 +25,13 @@ impl<'world> System<'world> for Deleter {
 
     fn run(
         &mut self,
-        (entities, mut selecteds, mut drawing_objects, mut deletes, updater): Self::SystemData,
+        (entities, selecteds, drawing_objects, mut deletes, updater): Self::SystemData,
     ) {
-        for (entity, delete) in (&entities, &mut deletes).join() {
-            for (entity, selected, drawing_object) in
+        for (entity, _delete) in (&entities, &mut deletes).join() {
+            for (entity, _selected, _drawing_object) in
                 (&entities, &selecteds, &drawing_objects).join()
             {
-                entities.delete(entity);
+                let _ = entities.delete(entity);
             }
             updater.remove::<Delete>(entity);
         }

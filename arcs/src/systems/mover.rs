@@ -12,7 +12,7 @@ pub struct Mover;
 impl Mover {
     pub const NAME: &'static str = module_path!();
 
-    pub fn new(world: &World) -> Mover {
+    pub fn new(_world: &World) -> Mover {
         Mover {}
     }
 }
@@ -23,23 +23,22 @@ impl<'world> System<'world> for Mover {
         ReadStorage<'world, Selected>,
         WriteStorage<'world, DrawingObject>,
         Read<'world, CursorPosition>,
-        Read<'world, LazyUpdate>,
     );
 
     fn run(
         &mut self,
-        (entities, selecteds, mut drawing_objects, cursor_position, updater): Self::SystemData,
+        (entities, selecteds, mut drawing_objects, cursor_position): Self::SystemData,
     ) {
-        for (entity, selected, drawing_object) in
+        for (_entity, _selected, drawing_object) in
             (&entities, &selecteds, &mut drawing_objects).join()
         {
-            if let Geometry::Point(point) = drawing_object.geometry {
+            if let Geometry::Point(_point) = drawing_object.geometry {
                 drawing_object.geometry =
                     Geometry::Point(cursor_position.location);
             };
 
             match drawing_object.geometry {
-                Geometry::Point(point) => {
+                Geometry::Point(_point) => {
                     drawing_object.geometry =
                         Geometry::Point(cursor_position.location);
                 }

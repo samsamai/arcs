@@ -1,6 +1,5 @@
 use crate::components::{
-    AddLine, AddPoint, CursorPosition, Delete, DrawingObject, Geometry, Layer,
-    Selected,
+    AddLine, AddPoint, CursorPosition, DrawingObject, Geometry, Selected,
 };
 use crate::primitives::Line;
 use specs::prelude::*;
@@ -15,7 +14,7 @@ pub struct Draw;
 impl Draw {
     pub const NAME: &'static str = module_path!();
 
-    pub fn new(world: &World) -> Draw {
+    pub fn new(_world: &World) -> Draw {
         Draw {}
     }
 }
