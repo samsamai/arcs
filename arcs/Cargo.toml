@@ -20,15 +20,15 @@ anyhow = "1"
 arcs-core = { path = "../core", features = ["ecs"] }
 cgmath = "0.17.0"
 euclid = "0.20.14"
-kurbo = "0.6"
+kurbo = "0.7.0"
 lazy_static = "1"
 log = "0.4"
 piet = "0.2.0-pre5"
 piet-web = "0.2.0-pre5"
-shred = { version = "0.10", default-features = false }
-shred-derive = "0.6"
-specs = { version = "0.16", default-features = false, features = ["wasm-bindgen"] }
-specs-derive = "0.4"
+shred = { version = "0.10.2", default-features = false }
+shred-derive = "0.6.2"
+specs = { version = "0.16.1", default-features = false, features = ["wasm-bindgen"] }
+specs-derive = "0.4.1"
 
 [dev-dependencies]
 piet-common = "0.2.0-pre5"
