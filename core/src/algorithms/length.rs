@@ -39,7 +39,7 @@ impl<Space> Length for Vector2D<f64, Space> {
     /// assert_eq!(vector.length(), 5.0);
     /// ```
     fn length(&self) -> f64 {
-        euclid::Vector2D::length(self)
+        euclid::Vector2D::length(*self)
     }
 }
 

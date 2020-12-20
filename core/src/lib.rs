@@ -7,7 +7,7 @@
     missing_debug_implementations,
     missing_copy_implementations,
     missing_docs,
-    intra_doc_link_resolution_failure
+    broken_intra_doc_links
 )]
 
 pub mod algorithms;
